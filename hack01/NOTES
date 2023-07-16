@@ -1,0 +1,11 @@
+Lucas de Medeiros França Romero, 11219154
+Leonardo Antonetti da Motta, 11275338
+Marcus Vinícius Santos Rodrigues, 11218862
+Gabriel Monteiro Ferracioli, 11219129
+André Santana Fernandes, 11208537
+
+Fazendo engenharia reversa no assembly do binário docrypt usando apenas objdump, verificamos que o programa utiliza a função authorize() para garantir a autenticação. Assim, como um dos requisitos do desafio é não alterar o binário, o que fizemos é utilizar a variável de ambiente LD_PRELOAD para carregar nossa biblioteca maliciosa com nossa própria função authorize() e impedir o carregamento da função original que verificaria corretamente, fazendo com que nossa função injetada possa retornar que toda a autenticação é válida, invalidando o mecanismo de autenticação.
+No segundo passo, analisamos o binário encrypt, utilizando “readelf -s”, procurando por símbolos. Um dos símbolos detectados, dado como objeto foi “encrypt_key”. A partir dessa informação, carregamos o binário no GDB, e utilizando o comando “info variables”, pudemos verificar o endereço da variável, o que nos permitiu recuperar o conteúdo da variável da memória para, então, superarmos a validação da chave de desencriptação.
+
+Uma alternativa de melhoria é compilar o código fonte do binário docrypt como estático. Com isso, os símbolos de funções não precisariam ser resolvidos dinamicamente por meio das indireções de plt e got, impossibilitando que a função authorize() pudesse ser sobrescrita, pois o binário já teria o endereço fixo dessa função em seu código e não precisaria resolvê-lo.
+
